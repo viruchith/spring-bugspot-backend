@@ -1,6 +1,9 @@
 package bugspot.app.model;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.validator.constraints.URL;
 
@@ -13,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,18 +44,22 @@ public class Project {
 	@URL
 	private String repoURL;
 	
-	private List<String> productVersions;
+	private List<String> productVersions = new ArrayList<>();
 	
 	@ManyToMany(cascade = CascadeType.DETACH)
 	@JoinTable(name = "project_members",
 	        joinColumns = @JoinColumn(name = "project_id"),
 	        inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private List<AppUser> members;
+	private Set<AppUser> members = new HashSet<>();
 	
 	@ManyToMany
 	@JoinTable(name = "project_admins",
 	        joinColumns = @JoinColumn(name = "project_id"),
 	        inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private List<AppUser> adminUsers;
+	private Set<AppUser> adminUsers = new HashSet<>();
+	
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Issue> issues = new ArrayList<>();
+
 	
 }

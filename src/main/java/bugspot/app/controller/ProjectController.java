@@ -1,6 +1,7 @@
 package bugspot.app.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import bugspot.app.dtos.AppUserDTO;
+import bugspot.app.dtos.MemberDTO;
 import bugspot.app.dtos.ProjectDTO;
 import bugspot.app.model.Project;
 import bugspot.app.service.ProjectService;
@@ -39,10 +42,48 @@ public class ProjectController {
 		return ResponseEntity.ok(projectDTOs);
 	}
 	
-	@DeleteMapping("{projectId}")
+	@DeleteMapping("/{projectId}")
 	public ResponseEntity<?> deleteProject(@PathVariable Long projectId){
 		projectService.deleteProject(projectId);
 		return new ResponseEntity<>("Project deleted successfully !",HttpStatus.NO_CONTENT);
+	}
+	
+	@GetMapping("/{projectId}/members")
+	public ResponseEntity<?> getProjectMembersForProject(@PathVariable Long projectId){
+		List<AppUserDTO> members =  projectService.getProjectMembersForProject(projectId);
+		return ResponseEntity.ok(members);
+	}
+
+	
+	@PostMapping("/{projectId}/members")
+	public ResponseEntity<?> addMemberToProjects(@PathVariable Long projectId, @Valid @RequestBody MemberDTO memberDTO){
+		List<AppUserDTO> members = projectService.addMemberToProject(projectId, memberDTO);
+		return new ResponseEntity<>(members,HttpStatus.CREATED);
+	}
+	
+	
+	@DeleteMapping("/{projectId}/members/{memberId}")
+	public ResponseEntity<?> deleteMemberFromProject(@PathVariable Long projectId,@PathVariable Long memberId){
+		projectService.deleteMemberFromProject(memberId, projectId);
+		return new ResponseEntity<>("Member deleted successfully !",HttpStatus.NO_CONTENT);
+	}
+	
+	@PostMapping("/{projectId}/admins")
+	public ResponseEntity<?> addAdminToProjects(@PathVariable Long projectId,@Valid @RequestBody MemberDTO memberDTO){
+		List<AppUserDTO> adminDtos = projectService.promoteMemberToAdminForProject(projectId, memberDTO);
+		return new ResponseEntity<>(adminDtos,HttpStatus.CREATED);
+	}
+	
+	@GetMapping("/{projectId}/admins")
+	public ResponseEntity<?> getAllAdminsForProject(@PathVariable Long projectId){
+		List<AppUserDTO> adminAppUserDTOs = projectService.getProjectAdminsForProject(projectId);
+		return ResponseEntity.ok(adminAppUserDTOs);
+	}
+	
+	@DeleteMapping("/{projectId}/admins/{memberId}")
+	public ResponseEntity<?> demoteAdminForProject(@PathVariable Long projectId, @PathVariable Long memberId){
+		projectService.demoteAdminFromProject(memberId, projectId);
+		return new ResponseEntity<>("Admin removed successfully !",HttpStatus.NO_CONTENT);
 	}
 	
 }

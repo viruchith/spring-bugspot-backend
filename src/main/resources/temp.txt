@@ -1,3 +1,147 @@
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "email")
+    private String email;
+
+    // One user can create many projects
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Project> projects = new ArrayList<>();
+
+    // One user can be a member of many projects
+    @ManyToMany(mappedBy = "members")
+    private List<Project> memberships = new ArrayList<>();
+
+    // One user can create many issues
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Issue> issues = new ArrayList<>();
+
+    // One user can create many comments
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    // getters and setters
+}
+
+@Entity
+@Table(name = "projects")
+public class Project {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "description")
+    private String description;
+
+    // One project can be created by one user
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id")
+    private User creator;
+
+    // One project can have many members
+    @ManyToMany
+    @JoinTable(
+        name = "project_members",
+        joinColumns = @JoinColumn(name = "project_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private List<User> members = new ArrayList<>();
+
+    // One project can have many issues
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Issue> issues = new ArrayList<>();
+
+    // getters and setters
+}
+
+@Entity
+@Table(name = "issues")
+public class Issue {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "description")
+    private String description;
+
+    // One issue can be created by one user
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private User author;
+
+    // One issue belongs to one project
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+     // One issue can have many comments
+     @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true)
+     private List<Comment> comments = new ArrayList<>();
+
+     // getters and setters
+}
+
+@Entity
+@Table(name="comments")
+public class Comment {
+
+   @Id
+   @GeneratedValue(strategy=GenerationType.IDENTITY)
+   private Long id;
+
+   @Column(name="content")
+   private String content;
+
+   // One comment can be created by one user
+   @ManyToOne(fetch=FetchType.LAZY)
+   @JoinColumn(name="author_id")
+   private User author;
+
+   // One comment belongs to one issue
+   @ManyToOne(fetch=FetchType.LAZY)
+   @JoinColumn(name="issue_id")
+   private Issue issue;
+
+   // getters and setters
+
+}
+
+
+
+
+
+
+
+
+
+
+x-----------------------------------------------------------------------------------------x
+
+
+
+
+
+
+
+
+
+
+
 // User.java
 @Entity
 @Table(name = "users")

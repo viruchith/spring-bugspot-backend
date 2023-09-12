@@ -34,11 +34,11 @@ public class AppCustomExceptionHandler {
 	}
 	
 	
-	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
-	@ExceptionHandler(UserAlreadyExistsException.class)
-	public ResponseEntity<?> handleUserAlreadyExistsException(UserAlreadyExistsException e){
-		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
-	}
+//	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
+//	@ExceptionHandler(UserAlreadyExistsException.class)
+//	public ResponseEntity<?> handleUserAlreadyExistsException(UserAlreadyExistsException e){
+//		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+//	}
 	
 	
 	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
@@ -46,6 +46,21 @@ public class AppCustomExceptionHandler {
 	public ResponseEntity<?> handleUserNotFoundExistsException(UserNotFoundException e){
 		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
 	}
+	
+	
+	@ResponseStatus(code = HttpStatus.NOT_FOUND)
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<?> handleResourceNotFoundExistsException(ResourceNotFoundException e){
+		return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+	}
+
+	@ResponseStatus(code = HttpStatus.FORBIDDEN)
+	@ExceptionHandler(UnauthorizedResourceActionException.class)
+	public ResponseEntity<?> handleUnauthorizedResourceActionException(UnauthorizedResourceActionException e){
+		return new ResponseEntity<>(e.getMessage(),HttpStatus.FORBIDDEN);
+	}
+
+	
 
 
 	

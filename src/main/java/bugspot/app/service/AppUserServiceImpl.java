@@ -2,6 +2,7 @@ package bugspot.app.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,9 +15,11 @@ import org.springframework.stereotype.Service;
 import bugspot.app.auth.CurrentLoggedInAppUser;
 import bugspot.app.auth.JWTProvider;
 import bugspot.app.auth.UserPrincipal;
+import bugspot.app.dtos.AppUserDTO;
 import bugspot.app.dtos.AppUserLoginDTO;
 import bugspot.app.exception.UserNotFoundException;
 import bugspot.app.model.AppUser;
+import bugspot.app.repository.AppUserDTORepository;
 import bugspot.app.repository.AppUserRepository;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,6 +42,9 @@ public class AppUserServiceImpl implements AppUserService {
 	@Autowired
 	private CurrentLoggedInAppUser currentLoggedInAppUser;
 
+	@Autowired
+	private AppUserDTORepository appUserDTORepository;
+	
 	
 	@Override
 	public AppUser addAppUser(AppUser appUser) throws UserNotFoundException {
@@ -60,11 +66,10 @@ public class AppUserServiceImpl implements AppUserService {
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(appUserLoginDTO.getUsername(), appUserLoginDTO.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String token = jwtProvider.generateToken(authentication);
-		//TODO passwordless user projection
-		AppUser appUser = appUserRepository.findFirstByUsername(appUserLoginDTO.getUsername()).orElseThrow(()->new UserNotFoundException("User with username : "+appUserLoginDTO.getUsername()+", does not exist !"));
+		AppUserDTO appUserDTO = appUserDTORepository.findFirstByUsername(appUserLoginDTO.getUsername(), AppUserDTO.class).orElseThrow(()->new UserNotFoundException("User with username : "+appUserLoginDTO.getUsername()+", does not exist !"));
 		Map<String, Object> map = new HashMap<>();
 		map.put("token", token);
-		map.put("user", appUser);
+		map.put("user", appUserDTO);
 		return map;
 	}
 
