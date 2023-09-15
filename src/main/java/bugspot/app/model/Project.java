@@ -1,5 +1,6 @@
 package bugspot.app.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,8 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -61,5 +64,20 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Issue> issues = new ArrayList<>();
 
+    
+    private LocalDateTime createdAt;
+
+	private LocalDateTime updatedAt;
+
+	@PrePersist
+	private void onCreate() {
+		createdAt = LocalDateTime.now();
+	}
+
+	@PreUpdate
+	private void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
+    
 	
 }
