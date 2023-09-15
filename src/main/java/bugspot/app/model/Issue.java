@@ -14,7 +14,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -39,19 +41,19 @@ public class Issue {
     @Enumerated(EnumType.STRING)
     private Status status;
     
-    @NotBlank
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Category category;
     
-    @NotBlank
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Reproducibility reproducibility;
     
-    @NotBlank
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Severity severity;
     
-    @NotBlank
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Priority priority;
     
@@ -69,6 +71,9 @@ public class Issue {
     private String additionalInformation;
     
     private String sourceCode;
+    
+    @OneToOne
+    private Comment acceptedComment;
     
     @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();

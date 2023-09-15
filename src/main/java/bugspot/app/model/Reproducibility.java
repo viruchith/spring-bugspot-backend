@@ -1,7 +1,7 @@
 package bugspot.app.model;
 
 public enum Reproducibility {
-	ALWWAYS,
+	ALWAYS,
 	SOMETIMES,
 	RANDOM,
 	UNABLE_TO_PRODUCE,

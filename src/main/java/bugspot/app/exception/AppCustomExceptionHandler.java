@@ -32,20 +32,8 @@ public class AppCustomExceptionHandler {
 	public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException e){
 		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
 	}
+		
 	
-	
-//	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
-//	@ExceptionHandler(UserAlreadyExistsException.class)
-//	public ResponseEntity<?> handleUserAlreadyExistsException(UserAlreadyExistsException e){
-//		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
-//	}
-	
-	
-	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
-	@ExceptionHandler(UserNotFoundException.class)
-	public ResponseEntity<?> handleUserNotFoundExistsException(UserNotFoundException e){
-		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
-	}
 	
 	
 	@ResponseStatus(code = HttpStatus.NOT_FOUND)
@@ -59,6 +47,17 @@ public class AppCustomExceptionHandler {
 	public ResponseEntity<?> handleUnauthorizedResourceActionException(UnauthorizedResourceActionException e){
 		return new ResponseEntity<>(e.getMessage(),HttpStatus.FORBIDDEN);
 	}
+	
+	
+	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(BadResourceActionException.class)
+	public ResponseEntity<?> handleBadResourceActionException(BadResourceActionException e){
+		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+	}
+	
+	
+	
+	
 
 	
 

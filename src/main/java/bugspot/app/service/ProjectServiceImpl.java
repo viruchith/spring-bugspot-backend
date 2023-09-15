@@ -253,6 +253,5 @@ public class ProjectServiceImpl implements ProjectService {
 		
 	}
 
-	// TODO updatae project details
 
 }

@@ -33,4 +33,8 @@ public interface ProjectService {
 	void demoteAdminFromProject(Long memberId, Long projectId) throws ProjectNotFoundException, UnauthorizedResourceActionException;
 	
 	List<AppUserDTO> getProjectAdminsForProject(Long projectId) throws ProjectNotFoundException, UnauthorizedResourceActionException;
+	
+	// TODO updatae project details
+	
+	//TODO UPDATE proejct version
 }
