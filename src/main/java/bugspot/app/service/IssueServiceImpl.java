@@ -60,6 +60,12 @@ public class IssueServiceImpl implements IssueService {
 		
 		return false;
 	}
+	
+	
+	private IssueDTO getIssueDTOById(Long issueId) {
+		IssueDTO issueDTO = issueRepository.findById(issueId,IssueDTO.class).orElseThrow(()->new IssueNotFoundException("Issue was not found !"));
+		return issueDTO;
+	}
 		
 	
 	@Override
@@ -69,8 +75,7 @@ public class IssueServiceImpl implements IssueService {
 			issue.setCreatorAppUser(currentUser);
 			issue.setStatus(Status.NEW);
 			issue = issueRepository.save(issue);
-			IssueDTO issueDTO = issueRepository.findById(issue.getId(),IssueDTO.class).orElseThrow(()->new IssueNotFoundException("Issue was not found !"));
-			return issueDTO;
+			return getIssueDTOById(issue.getId());
 		}
 		return null;
 		
@@ -103,9 +108,8 @@ public class IssueServiceImpl implements IssueService {
 			
 			currentIssue = issueRepository.save(currentIssue);
 			
-			IssueDTO issueDTO =  issueRepository.findById(currentIssue.getId(), IssueDTO.class).orElseThrow(()->new IssueNotFoundException());
 			
-			return issueDTO;
+			return getIssueDTOById(issueId);
 		}
 		return null;
 	}
@@ -124,8 +128,7 @@ public class IssueServiceImpl implements IssueService {
 		if(isCurrentUserCreatorOfTheIssue(projectId, issueId)) {
 			currentIssue.setStatus(status);
 			issueRepository.save(currentIssue);
-			IssueDTO issueDTO =  issueRepository.findById(currentIssue.getId(), IssueDTO.class).orElseThrow(()->new IssueNotFoundException());
-			return issueDTO;
+			return getIssueDTOById(issueId);
 		}
 		return null;
 	}

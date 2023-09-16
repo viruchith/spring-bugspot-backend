@@ -35,6 +35,48 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Autowired
 	private CurrentLoggedInAppUser currentLoggedInAppUser;
+	
+	private AppUser currentUser;
+	
+	private Project currentProject;
+
+	
+	private boolean isCurrentUserMemberOfProject(Long projectId) {
+		currentUser = currentLoggedInAppUser.get();
+		currentProject = projectRepository.findById(projectId).orElseThrow(()->new ProjectNotFoundException());
+		
+		if(currentProject.getMembers().contains(currentUser)) {
+			return true;
+		}else {
+			throw new UnauthorizedResourceActionException("You are not a member of this project !");
+
+		}
+	}
+	
+	private boolean isCurrentUserAdminOfTheProject(Long projectId) {
+		
+		if(isCurrentUserMemberOfProject(projectId)) {
+			if (currentProject.getAdminUsers().contains(currentUser)) {
+				return true;
+			}else {
+				throw new UnauthorizedResourceActionException("Only project admin can perform this action !");
+			}
+		}
+		
+		return false;
+		
+	}
+	
+	private boolean isCurrentUserOwnerOfTheProject(Long projectId) {
+		if(isCurrentUserAdminOfTheProject(projectId)) {
+			if(currentProject.getOwnerAppUser().equals(currentUser)) {
+				return true;
+			}else {
+				throw new UnauthorizedResourceActionException("You are not a owner of this project !");
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public ProjectDTO addProject(Project project) {
@@ -53,7 +95,6 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public List<ProjectDTO> getAllProjectsForUser(Long userId) {
-		// TODO get all projects where the user is member or owner
 		AppUser ownerAppUser = currentLoggedInAppUser.get();
 		List<ProjectDTO> projectDTOs = projectRepository.findAllByMembersContains(ownerAppUser, ProjectDTO.class);
 		return projectDTOs;
@@ -61,172 +102,122 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public void deleteProject(Long projectId) {
-		AppUser currentAppUser = currentLoggedInAppUser.get();
-
-		Optional<Project> projectOptional = projectRepository.findById(projectId);
-
-		if (projectOptional.isPresent()) {
-			Project project = projectOptional.get();
-
-			if (project.getOwnerAppUser().equals(currentAppUser)) {
-				projectRepository.delete(project);
-			} else {
-				throw new UnauthorizedResourceActionException("Only Project Owner can delete the project !");
-			}
+		if(isCurrentUserOwnerOfTheProject(projectId)) {
+			projectRepository.delete(currentProject);
 		}
 	}
 
 	@Override
 	public List<AppUserDTO> addMemberToProject(Long projectId, MemberDTO memberDTO) {
-		AppUser currentAppUser = currentLoggedInAppUser.get();
 
 		AppUser memberAppUser = appUserRepository.findFirstByUsername(memberDTO.getUsername())
 				.orElseThrow(() -> new UserNotFoundException(
 						"User with username : " + memberDTO.getUsername() + ", does not exist !"));
 		;
 
-		Optional<Project> projectOptional = projectRepository.findById(projectId);
-
-		if (projectOptional.isPresent()) {
-			Project project = projectOptional.get();
-			if (project.getOwnerAppUser().equals(currentAppUser) || project.getAdminUsers().contains(currentAppUser)) {
-				project.getMembers().add(memberAppUser);
-				project = projectRepository.save(project);
-				ProjectDTO projectDTO = projectRepository.findById(projectId, ProjectDTO.class);
-
-				List<AppUserDTO> members = projectDTO.getMembers();
-
-				return members;
-			} else {
-				throw new UnauthorizedResourceActionException(
-						"Only Project Owner and Admins can add members to the project !");
-			}
-		} else {
-			throw new ProjectNotFoundException("Project with id : " + projectId + ", doest not exist !");
+		if(isCurrentUserAdminOfTheProject(projectId)) {
+			currentProject.getMembers().add(memberAppUser);
+			currentProject = projectRepository.save(currentProject);
+			ProjectDTO projectDTO = projectRepository.findById(projectId, ProjectDTO.class);
+			List<AppUserDTO> members = projectDTO.getMembers();
+			return members;
 		}
+		
+		return null;
 
 	}
 
 	@Override
 	public void deleteMemberFromProject(Long memberId, Long projectId) throws ProjectNotFoundException {
-		AppUser currentAppUser = currentLoggedInAppUser.get();
 
 		AppUser memberAppUser = appUserRepository.findById(memberId)
 				.orElseThrow(() -> new UserNotFoundException("User by the id : " + memberId + ", does not exist !"));
 		;
 
-		Optional<Project> projectOptional = projectRepository.findById(projectId);
 
-		if (projectOptional.isPresent()) {
-			Project project = projectOptional.get();
-			if (project.getOwnerAppUser().equals(currentAppUser) || project.getAdminUsers().contains(currentAppUser)) {
-				if (project.getOwnerAppUser().equals(memberAppUser)) {
+			if (isCurrentUserAdminOfTheProject(projectId)) {
+				if (currentProject.getOwnerAppUser().equals(memberAppUser)) {
 					throw new UnauthorizedResourceActionException("Owner of the project cannot be deleted !");
 				}
 
-				if (!project.getOwnerAppUser().equals(currentLoggedInAppUser)
-						&& project.getAdminUsers().contains(memberAppUser)) {
+				if (!isCurrentUserOwnerOfTheProject(projectId)
+						&& currentProject.getAdminUsers().contains(memberAppUser)) {
 					throw new UnauthorizedResourceActionException(
 							"Only Owner of the project can delete other admins !");
 				}
 
-				Set<AppUser> adminUsers = project.getAdminUsers();
+				Set<AppUser> adminUsers = currentProject.getAdminUsers();
 				adminUsers.remove(memberAppUser);
-				project.setAdminUsers(adminUsers);
+				currentProject.setAdminUsers(adminUsers);
 
-				Set<AppUser> members = project.getMembers();
+				Set<AppUser> members = currentProject.getMembers();
 
 				members.remove(memberAppUser);
 
-				project.setMembers(members);
+				currentProject.setMembers(members);
 
-				projectRepository.save(project);
+				projectRepository.save(currentProject);
 
-			} else {
-				throw new UnauthorizedResourceActionException("Only Admins can delete a project member !");
-			}
-		} else {
-			throw new ProjectNotFoundException("Project with id : " + projectId + ", doest not exist !");
-		}
+			} 
+			
 	}
 
 	@Override
 	public List<AppUserDTO> promoteMemberToAdminForProject(Long projectId, MemberDTO memberDTO)
 			throws UsernameNotFoundException {
-		AppUser currentAppUser = currentLoggedInAppUser.get();
 
 		AppUser memberAppUser = appUserRepository.findFirstByUsername(memberDTO.getUsername())
 				.orElseThrow(() -> new UserNotFoundException(
 						"User with username : " + memberDTO.getUsername() + ", does not exist !"));
 		;
 
-		Optional<Project> projectOptional = projectRepository.findById(projectId);
 
-		if (projectOptional.isPresent()) {
-			Project project = projectOptional.get();
-
-			if (project.getOwnerAppUser().equals(currentAppUser)) {
-				Set<AppUser> members = project.getMembers();
+			if (isCurrentUserOwnerOfTheProject(projectId)) {
+				Set<AppUser> members = currentProject.getMembers();
 				members.add(memberAppUser);
-				project.setMembers(members);
-				Set<AppUser> adminUsers = project.getAdminUsers();
+				currentProject.setMembers(members);
+				Set<AppUser> adminUsers = currentProject.getAdminUsers();
 				adminUsers.add(memberAppUser);
-				project.setAdminUsers(adminUsers);
-				project = projectRepository.save(project);
+				currentProject.setAdminUsers(adminUsers);
+				currentProject = projectRepository.save(currentProject);
 				ProjectDTO projectDTO = projectRepository.findById(projectId, ProjectDTO.class);
 				List<AppUserDTO> adminDtos = projectDTO.getAdminUsers();
 				return adminDtos;
-			} else {
-				throw new UnauthorizedResourceActionException("Only Proejct owner can promote a member to admin !");
 			}
-		} else {
-			throw new ProjectNotFoundException("Project with id : " + projectId + ", doest not exist !");
-		}
+			
+			return null;
 
 	}
 
 	@Override
 	public List<AppUserDTO> getProjectMembersForProject(Long projectId) throws ProjectNotFoundException {
-		AppUser currentAppUser = currentLoggedInAppUser.get();
-
-		Optional<Project> projectOptional = projectRepository.findById(projectId);
-
-		if (projectOptional.isPresent()) {
-			Project project = projectOptional.get();
-			if (project.getMembers().contains(currentAppUser)) {
+		
+			if (isCurrentUserMemberOfProject(projectId)) {
 				ProjectDTO projectDTO = projectRepository.findById(projectId, ProjectDTO.class);
 				List<AppUserDTO> memberDtos = projectDTO.getMembers();
 				return memberDtos;
-			} else {
-				throw new UnauthorizedResourceActionException(
-						"You are not a member of this project ! You have no authority view the members");
-			}
-		} else {
-			throw new ProjectNotFoundException("Project with id : " + projectId + ", doest not exist !");
-		}
-
+			} 
+			
+			return null;
 	}
 
 	@Override
 	public void demoteAdminFromProject(Long memberId, Long projectId)
 			throws ProjectNotFoundException, UnauthorizedResourceActionException {
-		AppUser currentAppUser = currentLoggedInAppUser.get();
 
-		Project project = projectRepository.findById(projectId).orElseThrow(
-				() -> new ProjectNotFoundException("Project with id : " + projectId + ", doest not exist !"));
 
-		if (project.getOwnerAppUser().equals(currentAppUser)) {
+		if (isCurrentUserOwnerOfTheProject(projectId)) {
 			AppUser memberAppUser = appUserRepository.findById(memberId).orElseThrow(
 					() -> new UserNotFoundException("User by the id : " + memberId + ", does not exist !"));
 			;
-			if (currentAppUser.equals(memberAppUser)) {
+			if (currentUser.equals(memberAppUser)) {
 				throw new BadResourceActionException("Owner of the project cannot be removef from thet project !");
 			}
 
-			Set<AppUser> adminUsers = project.getAdminUsers();
+			Set<AppUser> adminUsers = currentProject.getAdminUsers();
 			adminUsers.remove(memberAppUser);
-			project.setAdminUsers(adminUsers);
-			projectRepository.save(project);
+			currentProject.setAdminUsers(adminUsers);
+			projectRepository.save(currentProject);
 		} else {
 			throw new UnauthorizedResourceActionException("Only the project owner can demote an ADMIN user !");
 		}
@@ -236,20 +227,15 @@ public class ProjectServiceImpl implements ProjectService {
 	@Override
 	public List<AppUserDTO> getProjectAdminsForProject(Long projectId)
 			throws ProjectNotFoundException, UnauthorizedResourceActionException {
-		AppUser currentAppUser = currentLoggedInAppUser.get();
-
-		Project project = projectRepository.findById(projectId).orElseThrow(
-				() -> new ProjectNotFoundException("Project with id : " + projectId + ", doest not exist !"));
-
-
-		if (project.getMembers().contains(currentAppUser)) {
-			ProjectDTO projectDTO = projectRepository.findById(projectId, ProjectDTO.class);
-			List<AppUserDTO> adminAppUserDTOs = projectDTO.getAdminUsers();
-			return adminAppUserDTOs;
-		}else {
-			throw new UnauthorizedResourceActionException(
-					"You are not a member of this project ! You have no authority view the members");
-		}
+		
+			if(isCurrentUserMemberOfProject(projectId)) {
+				ProjectDTO projectDTO = projectRepository.findById(projectId, ProjectDTO.class);
+				List<AppUserDTO> adminAppUserDTOs = projectDTO.getAdminUsers();
+				return adminAppUserDTOs;
+			}
+			
+			return null;
+		
 		
 	}
 
