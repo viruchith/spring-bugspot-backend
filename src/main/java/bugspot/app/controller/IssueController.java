@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import bugspot.app.dtos.CommentDTO;
 import bugspot.app.dtos.IssueDTO;
+import bugspot.app.model.Comment;
 import bugspot.app.model.Issue;
 import bugspot.app.model.Status;
+import bugspot.app.repository.CommentRepository;
 import bugspot.app.repository.IssueRepository;
 import bugspot.app.service.IssueService;
 import jakarta.validation.Valid;
@@ -60,6 +63,12 @@ public class IssueController {
 	public ResponseEntity<?> updateIssueStatus(@PathVariable Long projectId,@PathVariable Long issueId,@RequestBody @Valid Status status){
 		IssueDTO issueDTO =  issueService.updateIssueStatus(issueId, projectId,status);
 		return ResponseEntity.ok(issueDTO);
+	}
+	
+	@PutMapping("/{issueId}/acceptedStatus")
+	public ResponseEntity<?> updateAcceptedComment(@PathVariable Long projectId,@PathVariable Long issueId,@RequestBody @Valid Status status,@Valid @RequestBody Comment comment){
+		CommentDTO commentDTO = issueService.updateAcceptedComment(issueId, projectId, comment);
+		return ResponseEntity.ok(commentDTO);
 	}
 
 	

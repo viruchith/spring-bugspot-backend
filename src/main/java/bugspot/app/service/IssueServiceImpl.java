@@ -6,14 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bugspot.app.auth.CurrentLoggedInAppUser;
+import bugspot.app.dtos.CommentDTO;
 import bugspot.app.dtos.IssueDTO;
+import bugspot.app.exception.CommentNotFoundException;
 import bugspot.app.exception.IssueNotFoundException;
 import bugspot.app.exception.ProjectNotFoundException;
 import bugspot.app.exception.UnauthorizedResourceActionException;
 import bugspot.app.model.AppUser;
+import bugspot.app.model.Comment;
 import bugspot.app.model.Issue;
 import bugspot.app.model.Project;
 import bugspot.app.model.Status;
+import bugspot.app.repository.CommentRepository;
 import bugspot.app.repository.IssueRepository;
 import bugspot.app.repository.ProjectRepository;
 
@@ -28,6 +32,9 @@ public class IssueServiceImpl implements IssueService {
 	
 	@Autowired
 	private CurrentLoggedInAppUser currentLoggedInAppUser;
+	
+	@Autowired
+	private CommentRepository commentRepository;
 	
 	private AppUser currentUser;
 	
@@ -129,6 +136,22 @@ public class IssueServiceImpl implements IssueService {
 			currentIssue.setStatus(status);
 			issueRepository.save(currentIssue);
 			return getIssueDTOById(issueId);
+		}
+		return null;
+	}
+
+
+	@Override
+	public CommentDTO updateAcceptedComment(Long issueId, Long projectId, Comment comment) {
+		if(isCurrentUserCreatorOfTheIssue(projectId, issueId)) {
+			Comment commentPersisted = commentRepository.findById(comment.getId()).orElseThrow(()->new CommentNotFoundException("Comment by the ID : "+comment.getId()+", was not found !"));
+			if(currentIssue.getComments().contains(commentPersisted)) {
+				currentIssue.setAcceptedComment(commentPersisted);
+				CommentDTO commentDTO = commentRepository.findFirstById(commentPersisted.getId(), CommentDTO.class).orElseThrow(()->new CommentNotFoundException("Comment by the ID : "+comment.getId()+", was not found !"));;
+				return commentDTO;
+			}else {
+				throw new UnauthorizedResourceActionException("The comment is not part of the specified ISSUE !");
+			}
 		}
 		return null;
 	}

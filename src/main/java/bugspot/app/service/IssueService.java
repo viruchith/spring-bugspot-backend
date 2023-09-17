@@ -2,9 +2,11 @@ package bugspot.app.service;
 
 import java.util.List;
 
+import bugspot.app.dtos.CommentDTO;
 import bugspot.app.dtos.IssueDTO;
 import bugspot.app.exception.ProjectNotFoundException;
 import bugspot.app.exception.UnauthorizedResourceActionException;
+import bugspot.app.model.Comment;
 import bugspot.app.model.Issue;
 import bugspot.app.model.Status;
 
@@ -15,4 +17,5 @@ public interface IssueService {
 	void deleteIssue(Long issueId,Long projectId);
 	IssueDTO updateIssueStatus(Long issueId,Long projectId,Status status);
 	//TODO change status of issue
+	CommentDTO updateAcceptedComment(Long issueId,Long projectId,Comment comment);
 }
