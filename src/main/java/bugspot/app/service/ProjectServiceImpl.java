@@ -42,6 +42,9 @@ public class ProjectServiceImpl implements ProjectService {
 
 	
 	private boolean isCurrentUserMemberOfProject(Long projectId) {
+		/*
+		 * Check if user is member of the given project id
+		 */
 		currentUser = currentLoggedInAppUser.get();
 		currentProject = projectRepository.findById(projectId).orElseThrow(()->new ProjectNotFoundException());
 		
@@ -54,7 +57,9 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 	
 	private boolean isCurrentUserAdminOfTheProject(Long projectId) {
-		
+		/*
+		 * check if user is admin of the given project ID
+		 */
 		if(isCurrentUserMemberOfProject(projectId)) {
 			if (currentProject.getAdminUsers().contains(currentUser)) {
 				return true;
@@ -68,6 +73,11 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 	
 	private boolean isCurrentUserOwnerOfTheProject(Long projectId) {
+		/*
+		 * 
+		 * check if user is owner of the given project
+		 * 
+		 */
 		if(isCurrentUserAdminOfTheProject(projectId)) {
 			if(currentProject.getOwnerAppUser().equals(currentUser)) {
 				return true;
@@ -80,7 +90,11 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public ProjectDTO addProject(Project project) {
+		/*
+		 *  Save the project to DB
+		 */
 		AppUser currentAppUser = currentLoggedInAppUser.get();
+		// set current user as project owner
 		project.setOwnerAppUser(currentAppUser);
 		Set<AppUser> members = new HashSet<>();
 		Set<AppUser> adminUsers = new HashSet<>();
@@ -95,6 +109,9 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public List<ProjectDTO> getAllProjectsForUser(Long userId) {
+		/*
+		 * Get all projects in which the user is a member.
+		 */
 		AppUser ownerAppUser = currentLoggedInAppUser.get();
 		List<ProjectDTO> projectDTOs = projectRepository.findAllByMembersContains(ownerAppUser, ProjectDTO.class);
 		return projectDTOs;
@@ -102,6 +119,9 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public void deleteProject(Long projectId) {
+		/*
+		 * Delete the project by the given ID, only if the current user is owner of the project.
+		 */
 		if(isCurrentUserOwnerOfTheProject(projectId)) {
 			projectRepository.delete(currentProject);
 		}
@@ -109,7 +129,11 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public List<AppUserDTO> addMemberToProject(Long projectId, MemberDTO memberDTO) {
-
+		/*
+		 * 
+		 * Add the given user to the given project only if the current user is an admin of the project.
+		 * 
+		 */
 		AppUser memberAppUser = appUserRepository.findFirstByUsername(memberDTO.getUsername())
 				.orElseThrow(() -> new UserNotFoundException(
 						"User with username : " + memberDTO.getUsername() + ", does not exist !"));
@@ -130,6 +154,12 @@ public class ProjectServiceImpl implements ProjectService {
 	@Override
 	public void deleteMemberFromProject(Long memberId, Long projectId) throws ProjectNotFoundException {
 
+		/*
+		 * 
+		 * Delete the given member from the project only if the current user is owner of the project.
+		 * 
+		 */
+		
 		AppUser memberAppUser = appUserRepository.findById(memberId)
 				.orElseThrow(() -> new UserNotFoundException("User by the id : " + memberId + ", does not exist !"));
 		;
@@ -166,6 +196,11 @@ public class ProjectServiceImpl implements ProjectService {
 	public List<AppUserDTO> promoteMemberToAdminForProject(Long projectId, MemberDTO memberDTO)
 			throws UsernameNotFoundException {
 
+		/*
+		 * promote the given member to Admin of the project only if the current user is the project owner.
+		 * 
+		 */
+		
 		AppUser memberAppUser = appUserRepository.findFirstByUsername(memberDTO.getUsername())
 				.orElseThrow(() -> new UserNotFoundException(
 						"User with username : " + memberDTO.getUsername() + ", does not exist !"));
@@ -191,7 +226,9 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public List<AppUserDTO> getProjectMembersForProject(Long projectId) throws ProjectNotFoundException {
-		
+			/*
+			 * Get all members for the given project only if the current user is a member of the project.
+			 */
 			if (isCurrentUserMemberOfProject(projectId)) {
 				ProjectDTO projectDTO = projectRepository.findById(projectId, ProjectDTO.class);
 				List<AppUserDTO> memberDtos = projectDTO.getMembers();
@@ -205,6 +242,12 @@ public class ProjectServiceImpl implements ProjectService {
 	public void demoteAdminFromProject(Long memberId, Long projectId)
 			throws ProjectNotFoundException, UnauthorizedResourceActionException {
 
+		/*
+		 * 
+		 * Demote an admin of the given project to member only if the current user is the owner of the project.
+		 * 
+		 */
+		
 
 		if (isCurrentUserOwnerOfTheProject(projectId)) {
 			AppUser memberAppUser = appUserRepository.findById(memberId).orElseThrow(
@@ -226,6 +269,10 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public List<AppUserDTO> getProjectAdminsForProject(Long projectId)
+			/*
+			 * Get all admin users of the project only if the current user is a member of the project.
+			 * 
+			 */
 			throws ProjectNotFoundException, UnauthorizedResourceActionException {
 		
 			if(isCurrentUserMemberOfProject(projectId)) {

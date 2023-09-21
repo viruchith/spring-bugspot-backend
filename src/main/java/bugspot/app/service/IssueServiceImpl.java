@@ -43,6 +43,9 @@ public class IssueServiceImpl implements IssueService {
 	private Issue currentIssue;
 	
 	private boolean isCurrentUserAMemberOfProject(Long projectId) {
+		/*
+		 * Check if current user is a member of the given project ID.
+		 */
 		currentUser = currentLoggedInAppUser.get();
 		
 		currentProject = projectRepository.findById(projectId).orElseThrow(()->new ProjectNotFoundException("Project by the id : "+projectId+", was not found !"));
@@ -56,6 +59,9 @@ public class IssueServiceImpl implements IssueService {
 	
 	
 	private boolean isCurrentUserCreatorOfTheIssue(Long projectId,Long issueId) {
+		/*
+		 * Check if the current user is the creator of the given issue id.
+		 */
 		if(isCurrentUserAMemberOfProject(projectId)) {
 			currentIssue = issueRepository.findById(issueId).orElseThrow(()->new IssueNotFoundException("Issue by the id  :"+issueId+", does not exist ! "));
 			if(currentIssue.getCreatorAppUser().equals(currentUser)) {
@@ -77,6 +83,9 @@ public class IssueServiceImpl implements IssueService {
 	
 	@Override
 	public IssueDTO addIssueToProject(Issue issue, Long projectId) {
+		/*
+		 * add issue to the project only if the current user is a member of the project.
+		 */
 		if(isCurrentUserAMemberOfProject(projectId)) {
 			issue.setProject(currentProject);
 			issue.setCreatorAppUser(currentUser);
@@ -90,6 +99,11 @@ public class IssueServiceImpl implements IssueService {
 
 	@Override
 	public List<IssueDTO> getAllIssueForProject(Long projectId) {
+		/*
+		 * 
+		 * Get all issues for the given project.
+		 * 
+		 */
 		if(isCurrentUserAMemberOfProject(projectId)) {
 			List<IssueDTO> issueDTOs = issueRepository.findByProject(currentProject, IssueDTO.class);
 			return issueDTOs;
@@ -100,6 +114,11 @@ public class IssueServiceImpl implements IssueService {
 
 	@Override
 	public IssueDTO updateIssue(Long issueId,Issue issue, Long projectId) {
+		/*
+		 * 
+		 * Update issue for the given project only if the current user is the creator of the issue.
+		 * 
+		 */
 		if(isCurrentUserCreatorOfTheIssue(projectId, issueId)) {
 			currentIssue.setStatus(issue.getStatus());
 			currentIssue.setCategory(issue.getCategory());
@@ -124,6 +143,11 @@ public class IssueServiceImpl implements IssueService {
 
 	@Override
 	public void deleteIssue(Long issueId, Long projectId) {
+		/*
+		 * 
+		 * Delete the issue only if the current user is the creator of the issue
+		 * 
+		 */
 		if(isCurrentUserCreatorOfTheIssue(projectId, issueId)) {
 			issueRepository.delete(currentIssue);
 		}
@@ -132,6 +156,11 @@ public class IssueServiceImpl implements IssueService {
 
 	@Override
 	public IssueDTO updateIssueStatus(Long issueId, Long projectId, Status status) {
+		/*
+		 * 
+		 * Update the issue status only if the current user is the creator of the issue.
+		 * 
+		 */
 		if(isCurrentUserCreatorOfTheIssue(projectId, issueId)) {
 			currentIssue.setStatus(status);
 			issueRepository.save(currentIssue);
@@ -143,6 +172,11 @@ public class IssueServiceImpl implements IssueService {
 
 	@Override
 	public CommentDTO updateAcceptedComment(Long issueId, Long projectId, Comment comment) {
+		/*
+		 * 
+		 * Update the accepted comment of the issue only if the user is the creator of the issue.
+		 * 
+		 */
 		if(isCurrentUserCreatorOfTheIssue(projectId, issueId)) {
 			Comment commentPersisted = commentRepository.findById(comment.getId()).orElseThrow(()->new CommentNotFoundException("Comment by the ID : "+comment.getId()+", was not found !"));
 			if(currentIssue.getComments().contains(commentPersisted)) {

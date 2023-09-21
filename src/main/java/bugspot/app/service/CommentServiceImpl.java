@@ -46,6 +46,9 @@ public class CommentServiceImpl implements CommentService {
 	private Comment currentComment;
 	
 	private boolean isCurrentUserAMemberOfProject(Long projectId) {
+		/*
+		 * check if the current user is a member of the project.
+		 */
 		currentUser = currentLoggedInAppUser.get();
 		
 		currentProject = projectRepository.findById(projectId).orElseThrow(()->new ProjectNotFoundException("Project by the id : "+projectId+", was not found !"));
@@ -58,6 +61,9 @@ public class CommentServiceImpl implements CommentService {
 	}
 	
 	private boolean isIssuePartOfProject(Long issueId) {
+		/*
+		 * check if the issue is part of the project
+		 */
 		currentIssue = issueRepository.findById(issueId).orElseThrow(()->new IssueNotFoundException("Issue by the id :"+issueId+", does not exist !"));
 		if(currentProject.getIssues().contains(currentIssue)) {
 			return true;
@@ -68,6 +74,9 @@ public class CommentServiceImpl implements CommentService {
 	
 	
 	private boolean isCurrentCommentPartOfCurrentIssue(Long commentId) {
+		/*
+		 * check if the comment is part of the current issue.
+		 */
 		currentComment = commentRepository.findById(commentId).orElseThrow(()->new CommentNotFoundException("Comment By the ID : "+commentId+", was not found !"));
 		if(currentComment.getIssue().equals(currentIssue)) {
 			return true;
@@ -77,6 +86,9 @@ public class CommentServiceImpl implements CommentService {
 	}
 	
 	private boolean isCurrentUserCreatorOfCurrentComment() {
+		/*
+		 * check if the current user is the creator of the comment.
+		 */
 		if(currentComment.getCreatorAppUser().equals(currentUser)) {
 			return true;
 		}else {
@@ -91,6 +103,9 @@ public class CommentServiceImpl implements CommentService {
 	
 	@Override
 	public CommentDTO createComment(Long projectId, Long issueId, Comment comment) {
+		/*
+		 * Add the comment to a project and save it
+		 */
 		if(isCurrentUserAMemberOfProject(projectId) && isIssuePartOfProject(issueId)) {
 			comment.setCreatorAppUser(currentUser);
 			comment.setIssue(currentIssue);
@@ -102,6 +117,9 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public List<CommentDTO> getAllCommentsForIssue(Long projectId, Long issueId) {
+		/*
+		 * Get all comments in an Issue only if the current user a member of the project .
+		 */
 		if(isCurrentUserAMemberOfProject(projectId) && isIssuePartOfProject(issueId)) {
 			List<CommentDTO> commentDTOs = commentRepository.findByIssue(currentIssue,CommentDTO.class);
 			return commentDTOs;
@@ -111,6 +129,10 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public CommentDTO updateComment(Long projectId, Long issueId, Long commentId, Comment comment) {
+		/*
+		 * Update the comment only if the current user is the creator of the comment.
+		 * 
+		 */
 		if(isCurrentUserAMemberOfProject(projectId) && isIssuePartOfProject(issueId)) {
 			if(isCurrentCommentPartOfCurrentIssue(commentId) && isCurrentUserCreatorOfCurrentComment()) {
 				currentComment.setNote(comment.getNote());
@@ -124,6 +146,9 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public void deleteComment(Long projectId, Long issueId, Long commentId) {
+		/*
+		 * Delete the comment only if the user is the creator.
+		 */
 		if(isCurrentUserAMemberOfProject(projectId) && isIssuePartOfProject(issueId)) {
 			if(isCurrentCommentPartOfCurrentIssue(commentId) && isCurrentUserCreatorOfCurrentComment()) {
 				commentRepository.delete(currentComment);

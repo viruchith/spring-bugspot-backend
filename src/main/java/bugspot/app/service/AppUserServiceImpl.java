@@ -48,14 +48,17 @@ public class AppUserServiceImpl implements AppUserService {
 	
 	@Override
 	public AppUser addAppUser(AppUser appUser) throws UserNotFoundException {
+		// check if username already exists
 		if(appUserRepository.findFirstByUsername(appUser.getUsername()).isPresent()){
 			throw new UserAlreadyExistsException("User with username : "+appUser.getUsername()+", already exists !");
 		}
 		
+		// check if email already exists
 		if(appUserRepository.findFirstByUsername(appUser.getEmail()).isPresent()){
 			throw new UserAlreadyExistsException("User with email : "+appUser.getEmail()+", already exists !");
 		}
 		
+		// save encoded password to DB
 		appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
 		
 		return appUserRepository.save(appUser);
@@ -63,10 +66,12 @@ public class AppUserServiceImpl implements AppUserService {
 
 	@Override
 	public Map<String, Object> loginAppUser(AppUserLoginDTO appUserLoginDTO) {
+		// authenticate user
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(appUserLoginDTO.getUsername(), appUserLoginDTO.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String token = jwtProvider.generateToken(authentication);
 		AppUserDTO appUserDTO = appUserDTORepository.findFirstByUsername(appUserLoginDTO.getUsername(), AppUserDTO.class).orElseThrow(()->new UserNotFoundException("User with username : "+appUserLoginDTO.getUsername()+", does not exist !"));
+		// return user details and login token
 		Map<String, Object> map = new HashMap<>();
 		map.put("token", token);
 		map.put("user", appUserDTO);
