@@ -3,6 +3,7 @@ package bugspot.app.model;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -46,20 +47,22 @@ public class Project {
 	
 	@URL
 	private String repoURL;
+
+	private Set<String> productVersions = new LinkedHashSet<>();
 	
-	private List<String> productVersions = new ArrayList<>();
-	
+
 	@ManyToMany(cascade = CascadeType.DETACH)
 	@JoinTable(name = "project_members",
 	        joinColumns = @JoinColumn(name = "project_id"),
 	        inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private Set<AppUser> members = new HashSet<>();
+	private Set<AppUser> members = new LinkedHashSet<>();
 	
 	@ManyToMany
 	@JoinTable(name = "project_admins",
 	        joinColumns = @JoinColumn(name = "project_id"),
 	        inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private Set<AppUser> adminUsers = new HashSet<>();
+	private Set<AppUser> adminUsers = new LinkedHashSet<>();
+	
 	
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Issue> issues = new ArrayList<>();

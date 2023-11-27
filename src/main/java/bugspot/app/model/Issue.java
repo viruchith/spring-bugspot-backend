@@ -40,7 +40,7 @@ public class Issue {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "project_id", nullable = false)
 	private Project project;
-
+	
 	@Enumerated(EnumType.STRING)
 	private Status status;
 
