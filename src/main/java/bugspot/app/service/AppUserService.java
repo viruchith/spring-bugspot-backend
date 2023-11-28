@@ -4,7 +4,6 @@ package bugspot.app.service;
 import java.util.Map;
 
 import bugspot.app.dtos.AppUserLoginDTO;
-import bugspot.app.exception.UserNotFoundException;
 import bugspot.app.model.AppUser;
 
 public interface AppUserService {

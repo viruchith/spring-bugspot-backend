@@ -20,8 +20,6 @@ import bugspot.app.dtos.IssueDTO;
 import bugspot.app.model.Comment;
 import bugspot.app.model.Issue;
 import bugspot.app.model.Status;
-import bugspot.app.repository.CommentRepository;
-import bugspot.app.repository.IssueRepository;
 import bugspot.app.service.IssueService;
 import jakarta.validation.Valid;
 

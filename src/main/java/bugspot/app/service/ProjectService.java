@@ -9,11 +9,8 @@ import bugspot.app.dtos.AppUserDTO;
 import bugspot.app.dtos.MemberDTO;
 import bugspot.app.dtos.ProjectDTO;
 import bugspot.app.exception.ProjectNotFoundException;
-import bugspot.app.exception.ResourceNotFoundException;
 import bugspot.app.exception.UnauthorizedResourceActionException;
-import bugspot.app.model.AppUser;
 import bugspot.app.model.Project;
-import jakarta.validation.Valid;
 
 public interface ProjectService {
 	ProjectDTO addProject(Project project);

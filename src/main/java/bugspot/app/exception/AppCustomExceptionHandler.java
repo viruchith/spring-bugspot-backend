@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import bugspot.app.service.UserAlreadyExistsException;
-
 @ControllerAdvice
 public class AppCustomExceptionHandler {
 	@ResponseStatus(code = HttpStatus.BAD_REQUEST)

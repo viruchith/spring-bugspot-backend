@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import bugspot.app.auth.CurrentLoggedInAppUser;
 import bugspot.app.dtos.CommentDTO;
-import bugspot.app.dtos.IssueDTO;
 import bugspot.app.exception.BadResourceActionException;
 import bugspot.app.exception.CommentNotFoundException;
 import bugspot.app.exception.IssueNotFoundException;

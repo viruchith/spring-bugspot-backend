@@ -2,7 +2,6 @@ package bugspot.app.auth;
 
 import java.io.IOException;
 
-import org.hibernate.annotations.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
