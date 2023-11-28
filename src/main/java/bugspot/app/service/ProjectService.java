@@ -35,6 +35,7 @@ public interface ProjectService {
 	List<AppUserDTO> getProjectAdminsForProject(Long projectId) throws ProjectNotFoundException, UnauthorizedResourceActionException;
 	
 	// TODO updatae project details
-	
+	Set<String> addProjectVersion(Long projectId,String projectVersion);
+	void deleteProjectVersion(Long projectId, String projectVersion);
 	//TODO UPDATE proejct version
 }

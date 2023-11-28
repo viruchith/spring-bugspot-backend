@@ -1,6 +1,7 @@
 package bugspot.app.service;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -284,6 +285,41 @@ public class ProjectServiceImpl implements ProjectService {
 			return null;
 		
 		
+	}
+
+	@Override
+	public Set<String> addProjectVersion(Long projectId, String projectVersion) {
+		/*
+		 * Allow user to add project version only if he is the admin or owner of the project.
+		 * */
+		if(isCurrentUserOwnerOfTheProject(projectId) || isCurrentUserAdminOfTheProject(projectId)) {
+			Set<String> productVersions =  currentProject.getProductVersions();
+			if(productVersions==null) {
+				productVersions = new LinkedHashSet<>();
+			}
+			productVersions.add(projectVersion);
+			currentProject.setProductVersions(productVersions);
+			projectRepository.save(currentProject);
+			return currentProject.getProductVersions();
+		}
+		return null;
+	}
+
+	@Override
+	public void deleteProjectVersion(Long projectId, String projectVersion) {
+		/*
+		 * Allow user to delete project version only if the user is a admin or owner of the project.
+		 * */
+		if(isCurrentUserOwnerOfTheProject(projectId) || isCurrentUserAdminOfTheProject(projectId)) {
+			Set<String> productVersions =  currentProject.getProductVersions();
+			if(productVersions==null) {
+				productVersions = new LinkedHashSet<>();
+			}
+			productVersions.remove(projectVersion);
+			currentProject.setProductVersions(productVersions);
+			projectRepository.save(currentProject);
+
+		}
 	}
 
 

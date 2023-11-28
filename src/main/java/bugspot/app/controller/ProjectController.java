@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import bugspot.app.dtos.AppUserDTO;
 import bugspot.app.dtos.MemberDTO;
 import bugspot.app.dtos.ProjectDTO;
+import bugspot.app.dtos.ProjectVersionDTO;
 import bugspot.app.model.Project;
 import bugspot.app.service.ProjectService;
 import jakarta.validation.Valid;
@@ -86,4 +87,17 @@ public class ProjectController {
 		return new ResponseEntity<>("Admin removed successfully !",HttpStatus.NO_CONTENT);
 	}
 	
+	@PostMapping("/{projectId}/projectVersions")
+	public ResponseEntity<?> addProjectVersion(@PathVariable Long projectId, @Valid @RequestBody ProjectVersionDTO projectVersionDTO){
+		Set<String> projectVersions = projectService.addProjectVersion(projectId, projectVersionDTO.getProjectVersion());
+		return new ResponseEntity<>(projectVersions,HttpStatus.CREATED);
+	}
+	
+	@DeleteMapping("/{projectId}/projectVersions/{projectVersion}")
+	public ResponseEntity<?> deleteProjectVersion(@PathVariable Long projectId, @PathVariable String projectVersion){
+		projectService.deleteProjectVersion(projectId, projectVersion);
+		return new ResponseEntity<>("Project Version deleted successully !",HttpStatus.NO_CONTENT);
+	}
+	
+ 	
 }
