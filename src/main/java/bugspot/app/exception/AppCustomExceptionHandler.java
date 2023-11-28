@@ -53,6 +53,12 @@ public class AppCustomExceptionHandler {
 		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 	
+	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<?> handleUserNotFoundException(UserNotFoundException e){
+		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+	}
+	
 	
 	
 	

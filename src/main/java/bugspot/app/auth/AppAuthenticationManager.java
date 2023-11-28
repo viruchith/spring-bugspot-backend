@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class AppAuthenticationManager implements AuthenticationManager {
 	
 
 	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	public Authentication authenticate(Authentication authentication) throws AuthenticationException,UsernameNotFoundException {
 
 		String username = authentication.getPrincipal()+"";
 		
@@ -34,7 +35,13 @@ public class AppAuthenticationManager implements AuthenticationManager {
 		log.info("LOGGING IN FOR USER [ username :  {} | password : {} ",username,password);
 		
 
-		UserDetails user = userDetailsService.loadUserByUsername(authentication.getPrincipal() + "");
+		UserDetails user;
+		
+		try {
+			user = userDetailsService.loadUserByUsername(authentication.getPrincipal() + "");
+		} catch (Exception e) {
+			throw e;
+		}
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {
 			throw new BadCredentialsException("Incorrect Password !");

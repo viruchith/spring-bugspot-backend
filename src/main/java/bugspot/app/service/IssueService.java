@@ -12,7 +12,6 @@ import bugspot.app.model.Status;
 
 public interface IssueService {
 	List<IssueDTO> getAllIssueForProject(Long projectId) throws UnauthorizedResourceActionException,ProjectNotFoundException;
-	// TODO validate ProjectVersion while adding and updating ISSUE
 	IssueDTO addIssueToProject(Issue issue,Long projectId) throws UnauthorizedResourceActionException,ProjectNotFoundException;
 	IssueDTO updateIssue(Long issueId, Issue issue,Long projectId);
 	void deleteIssue(Long issueId,Long projectId);
