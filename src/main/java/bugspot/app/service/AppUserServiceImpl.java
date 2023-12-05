@@ -59,7 +59,9 @@ public class AppUserServiceImpl implements AppUserService {
 		// save encoded password to DB
 		appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
 		
-		return appUserRepository.save(appUser);
+		appUser =  appUserRepository.save(appUser);
+		
+		return appUser;
 	}
 
 	@Override
